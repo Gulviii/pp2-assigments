@@ -1,0 +1,5 @@
+n = int(input())
+g = list(map(int, input().split()))
+s = list(map(int, input().split()))
+dot_product = sum(x * y for x, y in zip(g, s))
+print(dot_product)

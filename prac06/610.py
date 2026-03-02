@@ -1,0 +1,5 @@
+n = int(input())
+numbers = list(map(int, input().split()))
+s = list(map(lambda x: x!=0, numbers))
+result = sum(s)
+print(result)
