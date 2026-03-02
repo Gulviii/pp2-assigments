@@ -1,0 +1,3 @@
+Hello, Gulvira!
+This is sample data.
+New line appended.
