@@ -1,0 +1,16 @@
+[
+  {
+    "name": "Ali",
+    "email": "ali@gmail.com",
+    "birthday": "1990-05-12",
+    "group": "Friend",
+    "phone": {"number": "87071112233", "type": "mobile"}
+  },
+  {
+    "name": "Dana",
+    "email": "dana@work.com",
+    "birthday": "1985-09-01",
+    "group": "Work",
+    "phone": {"number": "87271112233", "type": "work"}
+  }
+]
