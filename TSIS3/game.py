@@ -36,8 +36,26 @@ class Food:
                 break
 
 class Obstacle:
-    def __init__(self, level):
+    def __init__(self, level, snake_pos=(10,10)):
         self.blocks = []
         if level >= 3:
-            for _ in range(level*2):
-                self.blocks.append((random.randint(0, GRID_WIDTH-1), random.randint(0, GRID_HEIGHT-1)))
+            while len(self.blocks) < level*2:
+                pos = (random.randint(0, GRID_WIDTH-1), random.randint(0, GRID_HEIGHT-1))
+                # Жыланды қамауға алмайтындай шарт
+                if pos != snake_pos and pos not in self.blocks:
+                    self.blocks.append(pos)
+
+class PowerUp:
+    TYPES = ["speed","slow","shield"]
+    def __init__(self, obstacles=[]):
+        while True:
+            pos = (random.randint(0, GRID_WIDTH-1), random.randint(0, GRID_HEIGHT-1))
+            if pos not in obstacles:
+                self.pos = pos
+                break
+        self.kind = random.choice(PowerUp.TYPES)
+        self.spawn_time = pygame.time.get_ticks()
+        self.color = {"speed":(0,0,255),"slow":(255,255,0),"shield":(255,0,255)}[self.kind]
+
+    def expired(self):
+        return pygame.time.get_ticks() - self.spawn_time > 8000

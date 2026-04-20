@@ -9,7 +9,9 @@ def save_result(username, score, level):
     cur.execute("INSERT INTO players(username) VALUES(%s) ON CONFLICT(username) DO NOTHING", (username,))
     cur.execute("SELECT id FROM players WHERE username=%s", (username,))
     pid = cur.fetchone()[0]
-    cur.execute("INSERT INTO game_sessions(player_id, score, level_reached) VALUES(%s,%s,%s)", (pid, score, level))
+    # level_reached бағанын қолданамыз
+    cur.execute("INSERT INTO game_sessions(player_id, score, level_reached, played_at) VALUES(%s,%s,%s, CURRENT_TIMESTAMP)", 
+                (pid, score, level))
     conn.commit(); conn.close()
 
 def top10():
@@ -19,6 +21,7 @@ def top10():
                    ORDER BY g.score DESC LIMIT 10""")
     rows = cur.fetchall(); conn.close()
     return rows
+
 
 def personal_best(username):
     conn = connect(); cur = conn.cursor()
