@@ -23,7 +23,7 @@ text_pos = (0,0)
 
 clock = pygame.time.Clock()
 
-# Панельдегі батырмалар
+
 tools_list = ["pencil", "line", "fill", "text"]
 button_rects = {}
 for i, t in enumerate(tools_list):
@@ -36,14 +36,13 @@ def draw_panel():
         label = font.render(t, True, (0,0,0))
         screen.blit(label, (rect.x+10, rect.y+5))
         if tool == t:
-            pygame.draw.rect(screen, (0,0,255), rect, 2)  # белсенді құралды көк жиекпен көрсету
+            pygame.draw.rect(screen, (0,0,255), rect, 2) 
 
 while True:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             pygame.quit(); sys.exit()
 
-        # Панельдегі батырманы басу
         if event.type == pygame.MOUSEBUTTONDOWN:
             for t, rect in button_rects.items():
                 if rect.collidepoint(event.pos):
@@ -76,7 +75,6 @@ while True:
                 pygame.draw.line(canvas, color, last_pos, event.pos, brush_size)
                 last_pos = event.pos
 
-        # Клавиатура
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_1: brush_size = 2
             elif event.key == pygame.K_2: brush_size = 5
@@ -106,16 +104,13 @@ while True:
                 else:
                     text_buffer += event.unicode
 
-    # Rendering
     screen.blit(canvas, (0,0))
     if text_active:
         preview = font.render(text_buffer, True, color)
         screen.blit(preview, text_pos)
 
-    # Панельді салу
     draw_panel()
 
-    # Нұсқауларды төменгі панельге шығару
     instructions = "Text tool: Enter – бекіту, Esc – болдырмау, Backspace – өшіру, Delete – тазалау, Ctrl+T – мәтінді сақтау"
     instr_surface = instruction_font.render(instructions, True, (0,0,0))
     screen.blit(instr_surface, (10, screen.get_height()-30))
