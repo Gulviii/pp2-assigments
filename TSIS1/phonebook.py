@@ -2,6 +2,7 @@ import psycopg2
 import json
 from connect import get_connection
 
+
 def filter_by_group(group_name):
     conn = get_connection()
     cur = conn.cursor()
@@ -26,7 +27,10 @@ def search_by_email(query):
 def sort_contacts(by="name"):
     conn = get_connection()
     cur = conn.cursor()
-    cur.execute(f"SELECT * FROM contacts ORDER BY {by}")
+    allowed = {"name":"c.name","birthday":"c.birthday","date":"c.id"}
+    if by not in allowed:
+        by = "name"
+    cur.execute(f"SELECT * FROM contacts ORDER BY {allowed[by]}")
     for row in cur.fetchall():
         print(row)
     conn.close()
@@ -56,10 +60,12 @@ def export_to_json(filename="contacts.json"):
     conn = get_connection()
     cur = conn.cursor()
     cur.execute("""
-        SELECT c.id, c.name, c.email, c.birthday, g.name, p.phone, p.type
+        SELECT c.id, c.name, c.email, c.birthday, g.name,
+               json_agg(json_build_object('number', p.phone, 'type', p.type)) AS phones
         FROM contacts c
         LEFT JOIN groups g ON c.group_id = g.id
         LEFT JOIN phones p ON c.id = p.contact_id
+        GROUP BY c.id, c.name, c.email, c.birthday, g.name
     """)
     rows = cur.fetchall()
     data = []
@@ -69,7 +75,7 @@ def export_to_json(filename="contacts.json"):
             "email": r[2],
             "birthday": str(r[3]) if r[3] else None,
             "group": r[4],
-            "phone": {"number": r[5], "type": r[6]}
+            "phones": r[5] if r[5] else []
         })
     with open(filename, "w") as f:
         json.dump(data, f, indent=4)
@@ -80,22 +86,44 @@ def import_from_json(filename="contacts.json"):
     cur = conn.cursor()
     with open(filename) as f:
         data = json.load(f)
+
     for contact in data:
+        # group өңдеу
+        cur.execute("SELECT id FROM groups WHERE name=%s", (contact["group"],))
+        g = cur.fetchone()
+        if not g:
+            cur.execute("INSERT INTO groups(name) VALUES (%s) RETURNING id", (contact["group"],))
+            g_id = cur.fetchone()[0]
+        else:
+            g_id = g[0]
+
+        # contact бар ма?
         cur.execute("SELECT id FROM contacts WHERE name=%s", (contact["name"],))
         existing = cur.fetchone()
+
         if existing:
             choice = input(f"Contact {contact['name']} exists. Skip or overwrite? ").lower()
             if choice == "skip":
                 continue
             elif choice == "overwrite":
-                cur.execute("UPDATE contacts SET email=%s, birthday=%s WHERE id=%s",
-                            (contact["email"], contact["birthday"], existing[0]))
+                cur.execute("UPDATE contacts SET email=%s, birthday=%s, group_id=%s WHERE id=%s",
+                            (contact["email"], contact["birthday"], g_id, existing[0]))
+                cid = existing[0]
+                # overwrite кезінде ескі телефондарды өшіреміз
+                cur.execute("DELETE FROM phones WHERE contact_id=%s", (cid,))
+                # жаңаларын қайта қосамыз
+                for ph in contact.get("phones", []):
+                    cur.execute("INSERT INTO phones(contact_id,phone,type) VALUES (%s,%s,%s)",
+                                (cid, ph["number"], ph["type"]))
         else:
-            cur.execute("INSERT INTO contacts(name,email,birthday) VALUES (%s,%s,%s) RETURNING id",
-                        (contact["name"], contact["email"], contact["birthday"]))
+            # жаңа контакт қосамыз
+            cur.execute("INSERT INTO contacts(name,email,birthday,group_id) VALUES (%s,%s,%s,%s) RETURNING id",
+                        (contact["name"], contact["email"], contact["birthday"], g_id))
             cid = cur.fetchone()[0]
-            if contact["phone"]["number"]:
+            # телефондары массив болса — бәрін қосамыз
+            for ph in contact.get("phones", []):
                 cur.execute("INSERT INTO phones(contact_id,phone,type) VALUES (%s,%s,%s)",
-                            (cid, contact["phone"]["number"], contact["phone"]["type"]))
+                            (cid, ph["number"], ph["type"]))
+
     conn.commit()
     conn.close()

@@ -1,4 +1,4 @@
--- Add phone
+
 CREATE OR REPLACE PROCEDURE add_phone(p_contact_name VARCHAR, p_phone VARCHAR, p_type VARCHAR)
 LANGUAGE plpgsql AS $$
 BEGIN
@@ -7,7 +7,7 @@ BEGIN
 END;
 $$;
 
--- Move to group
+
 CREATE OR REPLACE PROCEDURE move_to_group(p_contact_name VARCHAR, p_group_name VARCHAR)
 LANGUAGE plpgsql AS $$
 DECLARE
@@ -21,7 +21,6 @@ BEGIN
 END;
 $$;
 
--- Search contacts (extended)
 CREATE OR REPLACE FUNCTION search_contacts(p_query TEXT)
 RETURNS TABLE(contact_name VARCHAR, email VARCHAR, phone VARCHAR) AS $$
 BEGIN
