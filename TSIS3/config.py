@@ -1,5 +1,5 @@
 DB_PARAMS = {
-    "dbname": "postgres",   # міндетті түрде snake_db болу керек
+    "dbname": "postgres",   
     "user": "postgres",
     "password": "Gg123456)",
     "host": "localhost",

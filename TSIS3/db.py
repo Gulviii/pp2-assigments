@@ -9,7 +9,7 @@ def save_result(username, score, level):
     cur.execute("INSERT INTO players(username) VALUES(%s) ON CONFLICT(username) DO NOTHING", (username,))
     cur.execute("SELECT id FROM players WHERE username=%s", (username,))
     pid = cur.fetchone()[0]
-    # level_reached бағанын қолданамыз
+
     cur.execute("INSERT INTO game_sessions(player_id, score, level_reached, played_at) VALUES(%s,%s,%s, CURRENT_TIMESTAMP)", 
                 (pid, score, level))
     conn.commit(); conn.close()

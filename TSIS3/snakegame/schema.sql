@@ -1,10 +1,10 @@
--- Қолданушылар кестесі
+
 CREATE TABLE players (
     id SERIAL PRIMARY KEY,
     username VARCHAR(50) UNIQUE NOT NULL
 );
 
--- Ойын нәтижелері кестесі
+
 CREATE TABLE game_sessions (
     id SERIAL PRIMARY KEY,
     player_id INT REFERENCES players(id) ON DELETE CASCADE,

@@ -6,15 +6,15 @@ pygame.init()
 screen = pygame.display.set_mode((GRID_WIDTH*CELL_SIZE, GRID_HEIGHT*CELL_SIZE))
 pygame.display.set_caption("Snake Game")
 
-# Settings
+
 with open("settings.json") as f: settings = json.load(f)
-# Дыбыстар
+
 pygame.mixer.init()
 eat_sound = pygame.mixer.Sound("TSIS3/assets/sounds/free-sound-1674743464.mp3")
 gameover_sound = pygame.mixer.Sound("TSIS3/assets/sounds/free-sound-1675012530.mp3")
 pygame.mixer.music.load("TSIS3/assets/sounds/super-mario-bros_2.mp3")
 
-# Volume орнату
+
 eat_sound.set_volume(1.0 if settings["sound"] else 0.0)
 gameover_sound.set_volume(1.0 if settings["sound"] else 0.0)
 pygame.mixer.music.set_volume(1.0 if settings["sound"] else 0.0)
@@ -22,7 +22,6 @@ pygame.mixer.music.set_volume(1.0 if settings["sound"] else 0.0)
 if settings["sound"]:
     pygame.mixer.music.play(-1)
 
-# Суреттер
 def load_scaled(path):
     img = pygame.image.load(path)
     return pygame.transform.scale(img, (CELL_SIZE, CELL_SIZE))
@@ -34,7 +33,6 @@ poison_img = load_scaled("TSIS3/assets/images/poison.png")
 
 username = ""
 
-# Username енгізу
 def username_entry():
     global username
     font = pygame.font.SysFont("Arial", 36)
@@ -58,7 +56,6 @@ def username_entry():
                 else:
                     text += event.unicode
 
-# Main Menu
 def main_menu():
     running = True
     font = pygame.font.SysFont("Arial", 36)
@@ -81,7 +78,6 @@ def main_menu():
                 elif event.key == pygame.K_s: settings_screen()
                 elif event.key == pygame.K_q: pygame.quit(); sys.exit()
 
-# Leaderboard
 def leaderboard_screen():
     rows = top10()
     font = pygame.font.SysFont("Arial", 24)
@@ -101,7 +97,6 @@ def leaderboard_screen():
                 if event.key == pygame.K_ESCAPE:
                     running = False
 
-# Settings экраны
 def settings_screen():
     running = True
     font = pygame.font.SysFont("Arial", 24)
@@ -131,7 +126,6 @@ def settings_screen():
                 elif event.key == pygame.K_ESCAPE:
                     running = False
 
-# Game Over
 def game_over_screen(username, score, level):
     best = personal_best(username)
     save_result(username, score, level)
@@ -164,7 +158,7 @@ def run_game(username):
     powerup_start = None
 
     while running:
-        # Input
+
         for event in pygame.event.get():
             if event.type == pygame.QUIT: pygame.quit(); sys.exit()
             if event.type == pygame.KEYDOWN:
@@ -175,14 +169,12 @@ def run_game(username):
 
         snake.move()
 
-        # Normal food
         if snake.body[0] == food.pos:
             snake.eat_food("normal")
             score += 10
             if settings["sound"]: eat_sound.play()
             food = Food("normal", obstacles.blocks)
 
-        # Poison food
         if snake.body[0] == poison.pos:
             if snake.eat_food("poison") == "gameover":
                 game_over_screen(username, score, level)
@@ -190,13 +182,11 @@ def run_game(username):
             if settings["sound"]: gameover_sound.play()
             poison = Food("poison", obstacles.blocks)
 
-        # PowerUp spawn
         if powerup is None and random.randint(0,200) == 1:
             powerup = PowerUp(obstacles.blocks)
         if powerup and powerup.expired():
             powerup = None
 
-        # PowerUp collected
         if powerup and snake.body[0] == powerup.pos:
             if powerup.kind == "speed":
                 speed = 20; powerup_start = pygame.time.get_ticks()
@@ -206,7 +196,6 @@ def run_game(username):
                 snake.shield = True
             powerup = None
 
-        # Collisions
         head_x, head_y = snake.body[0]
         if (head_x < 0 or head_x >= GRID_WIDTH or head_y < 0 or head_y >= GRID_HEIGHT
             or snake.body[0] in snake.body[1:]
@@ -217,12 +206,10 @@ def run_game(username):
                 game_over_screen(username, score, level)
                 return
 
-        # Level progression
         if score // 50 + 1 > level:
             level += 1
             obstacles = Obstacle(level, snake.body[0])
 
-        # Drawing
         screen.blit(background_img, (0,0))
         screen.blit(food_img, (food.pos[0]*CELL_SIZE, food.pos[1]*CELL_SIZE))
         screen.blit(poison_img, (poison.pos[0]*CELL_SIZE, poison.pos[1]*CELL_SIZE))
@@ -242,7 +229,6 @@ def run_game(username):
 
         pygame.display.flip()
 
-        # PowerUp duration check
         if powerup_start and pygame.time.get_ticks() - powerup_start > 5000:
             speed = 10 + level
             powerup_start = None
