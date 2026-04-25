@@ -88,7 +88,6 @@ def import_from_json(filename="contacts.json"):
         data = json.load(f)
 
     for contact in data:
-        # group өңдеу
         cur.execute("SELECT id FROM groups WHERE name=%s", (contact["group"],))
         g = cur.fetchone()
         if not g:
@@ -97,7 +96,6 @@ def import_from_json(filename="contacts.json"):
         else:
             g_id = g[0]
 
-        # contact бар ма?
         cur.execute("SELECT id FROM contacts WHERE name=%s", (contact["name"],))
         existing = cur.fetchone()
 
@@ -109,18 +107,18 @@ def import_from_json(filename="contacts.json"):
                 cur.execute("UPDATE contacts SET email=%s, birthday=%s, group_id=%s WHERE id=%s",
                             (contact["email"], contact["birthday"], g_id, existing[0]))
                 cid = existing[0]
-                # overwrite кезінде ескі телефондарды өшіреміз
+
                 cur.execute("DELETE FROM phones WHERE contact_id=%s", (cid,))
-                # жаңаларын қайта қосамыз
+
                 for ph in contact.get("phones", []):
                     cur.execute("INSERT INTO phones(contact_id,phone,type) VALUES (%s,%s,%s)",
                                 (cid, ph["number"], ph["type"]))
         else:
-            # жаңа контакт қосамыз
+
             cur.execute("INSERT INTO contacts(name,email,birthday,group_id) VALUES (%s,%s,%s,%s) RETURNING id",
                         (contact["name"], contact["email"], contact["birthday"], g_id))
             cid = cur.fetchone()[0]
-            # телефондары массив болса — бәрін қосамыз
+
             for ph in contact.get("phones", []):
                 cur.execute("INSERT INTO phones(contact_id,phone,type) VALUES (%s,%s,%s)",
                             (cid, ph["number"], ph["type"]))
