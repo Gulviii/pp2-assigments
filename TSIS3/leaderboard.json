@@ -25,18 +25,18 @@
     },
     {
         "name": "Player",
+        "score": 65
+    },
+    {
+        "name": "Player",
+        "score": 57
+    },
+    {
+        "name": "Player",
         "score": 48
     },
     {
         "name": "Player",
         "score": 44
-    },
-    {
-        "name": "Player",
-        "score": 39
-    },
-    {
-        "name": "Player",
-        "score": 36
     }
 ]
